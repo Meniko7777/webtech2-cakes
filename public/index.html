@@ -1,0 +1,142 @@
+<html>
+<head>
+<title>Torták</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<link href="css/simple-sidebar.css" rel="stylesheet" type="text/css">
+<link href="animations.css" rel="stylesheet" type="text/css">
+<script src="js/bootstrap.min.js"></script>
+<script src="js/angular.min.js"></script>
+<script src="js/jquery.js"></script>
+<meta name="viewport" content="width=device-width, shrink-to-fit=no, initial-scale=1">
+</head>
+
+<body ng-app="cakeManager" ng-controller="menuCtrl">
+
+ <div id="wrapper" style="background-image:url('img/backgroundpic.jpg')">
+
+        <!-- Sidebar -->
+        <div id="sidebar-wrapper" style="background-image:url('img/IMG_20170422_224633.jpg')">
+            <ul class="sidebar-nav">
+                <li class="sidebar-brand">
+                    <a href="#" ng-click="homePage()">Torta adatbázis</a>
+                </li>
+                <li>
+                    <a href="#" ng-click="addCake()">Torta hozzáadása</a>
+                </li>
+                <li>
+                    <a href="#" ng-click="listCakes()">Összes torta</a>
+                </li>
+            </ul>
+        </div>
+
+<div id="page-content-wrapper">
+<div class="container-fluid">
+ <div class="row">
+  <div class="col-lg-12" id="addCakesForm">
+  <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Opciók</a><br>
+	<div class="panel panel-default">
+	<div class="panel-heading">Új torta hozzáadása</div>
+	<div class="panel-body">
+		<form id="cakeForm">
+			Név: <input name="name" type="text"/><br/>
+			Típus: <input name="type" type="text"/><br/>
+			Ár: <input name="price" type="text"/><br/>
+			<button type="button" class="btn btn-success" ng-click="sendForm()">OK</button>
+		</form>
+	</div>
+	</div>
+	<div class="col-lg-12" id="cakeList">
+	<a href="#menu-toggle" class="btn btn-default" id="menu-toggle2">Opciók</a><br>
+	<div class="panel panel-default">
+	<div class="panel-heading">Összes torta</div>
+	<div class="panel-body">
+	<table class="table table-hover">
+		<tr><th>Név</th><th>Típus</th><th>Ár</th></tr>
+		<tr ng-repeat="cake in cakes">
+			<td>{{cake.name}}</td>
+			<td>{{cake.type}}</td>
+			<td>{{cake.price}}</td>
+			<td><button type="button" class="btn btn-default btn-sm" ng-click="deleteCake(cake.name)">
+          <span class="glyphicon glyphicon-remove"></span> Törlés 
+        </button></td>
+		</tr> 
+	</table>
+	</div>
+	</div>
+	</div>
+	<div class="col-lg-12" id="homePage">
+		<p></p>
+	<a href="#menu-toggle" class="btn btn-default" id="menu-toggle3">Opciók</a><br>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+$("#menu-toggle").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+});
+</script>
+<script>
+$("#menu-toggle2").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+});
+</script>
+<script>
+$("#menu-toggle3").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+});
+</script>
+
+<script>
+var cakeListingModule = angular.module("cakeList",[]);
+var cakeManagementModule = angular.module("cakeManager",[]);
+var contentVar = 0;
+cakeManagementModule.controller("menuCtrl",function($scope,$http){
+	$scope.listCakes = function(){
+	
+		document.getElementById("addCakesForm").style.visibility = "hidden";
+		document.getElementById("cakeList").style.visibility = "visible";
+		document.getElementById("homePage").style.visibility = "hidden";
+		$http.get('/cakes').then(function(resp){
+			console.log('get cakes');
+			$scope.cakes = resp.data;		
+
+		});
+	};
+		$scope.homePage = function(){
+		document.getElementById("addCakesForm").style.visibility = "hidden";
+		document.getElementById("cakeList").style.visibility = "hidden";
+		document.getElementById("homePage").style.visibility = "visible";
+	};
+	$scope.addCake = function(){
+		document.getElementById("addCakesForm").style.visibility = "visible";
+		document.getElementById("cakeList").style.visibility = "hidden";
+		document.getElementById("homePage").style.visibility = "hidden";
+	};
+	$scope.sendForm = function(){
+		var form = document.getElementById('cakeForm');
+		var cake = new Object();
+		cake.name = form['name'].value;
+		cake.type = form['type'].value;
+		cake.price = form['price'].value;
+		console.log(JSON.stringify(cake));
+		$http.post('/addCake',JSON.stringify(cake)).success(function(){
+			alert('success');
+		});
+		$scope.listCakes();
+	};
+	$scope.deleteCake = function(name){
+		$http.get('/deleteCake?name=' + name);
+		$scope.listCakes();
+	};
+	window.onload = $scope.homePage();
+});	
+</script>
+</body>
+</html>
